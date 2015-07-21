@@ -13,7 +13,7 @@ omega = matrix(rbind(rdirichlet(nsamp_per_pop,sample(1:maxscale, replace=T, nclu
                         rdirichlet(nsamp_per_pop,sample(1:maxscale, replace=T, nclusters)),
                         rdirichlet(nsamp_per_pop,sample(1:maxscale, replace=T, nclusters)),
                         rdirichlet(nsamp_per_pop,sample(1:maxscale, replace=T, nclusters))), 
-                        nrow=(T*5));
+                        nrow=(nsamp_per_pop*npop));
 
 
 simulate_allele_freq <- function(alpha, nSNPs){
@@ -27,7 +27,7 @@ simulate_allele_freq <- function(alpha, nSNPs){
 alpha <- c(1,1,1,1);
 
 # size = nclusters x nSNPs
-freq_mat <- t(matrix(unlist(lapply(1:nclusters, function(n) simulate_allele_freq(alpha[n],5))),ncol=nclusters));
+freq_mat <- t(matrix(unlist(lapply(1:nclusters, function(n) simulate_allele_freq(alpha[n],nSNPs =5))),ncol=nclusters));
 
 simulate_binomial_model <- function(omega, freq_mat)
 {
