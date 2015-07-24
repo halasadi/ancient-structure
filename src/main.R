@@ -8,6 +8,7 @@ source('update_EM.R')
 source('update_squarem.R')
 source('simulate_model.R')
 source('loglik_em.R')
+source('simplex_functions.R')
 
 npop=5;
 nsamp_per_pop=50;
@@ -46,12 +47,13 @@ ancient_structure <- function(geno_data, f_known, K_unknown, max_iter)
   nSNPs <- dim(geno_data)[2];
   f_unknown_initial = matrix(nrow = nSNPs, ncol = K_unknown, runif(nSNPs*K_unknown))
   q_initial = matrix(nrow = nsamp, ncol = K_pooled, rdirichlet(nsamp, rep(1/K_pooled,K_pooled)));
+  rev_q_initial <-as.matrix(t(apply(q_initial, 1, function(x) reverse_transform(x))));
   # column wise
-  param_vec_in <- c(as.vector(q_initial),as.vector(f_unknown_initial),as.vector(f_known));
+  param_vec_in <- c(as.vector(rev_q_initial),as.vector(f_unknown_initial),as.vector(f_known));
   
   res <- squarem(par=as.numeric(param_vec_in),
                              fixptfn=update_squarem,
-                            # objfn= loglik_squarem,
+                             objfn= loglik_squarem,
                              geno_data = geno_data,
                              nsamp = nsamp,
                              nSNPs = nSNPs,
@@ -64,9 +66,10 @@ ancient_structure <- function(geno_data, f_known, K_unknown, max_iter)
   
  
   ## END TESTING ##
-  
-  q = matrix(res$par[(1:(nsamp*K_pooled))],nrow = nsamp, ncol = K_pooled);
-  temp <- res$par[-(1:(nsamp*K_pooled))];
+  rev_q = matrix(res$par[(1:(nsamp*(K_pooled-1)))],nrow = nsamp, ncol = (K_pooled-1));
+  q <- t(apply(rev_q, 1,function(x) transform(x)));
+ # q = matrix(res$par[(1:(nsamp*K_pooled))],nrow = nsamp, ncol = K_pooled);
+  temp <- res$par[-(1:(nsamp*(K_pooled-1)))];
   f_unknown <- matrix(temp[0:(nSNPs*K_unknown)], nrow=nSNPs, ncol=K_unknown)
   beg = nSNPs*K_unknown + 1
   end = nSNPs*K_pooled
