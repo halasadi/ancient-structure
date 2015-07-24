@@ -2,33 +2,6 @@
 # @: function to simulate a N \times L matrix for L sites and N samples 
 # day populations and N_a ancient populations. 
 
-npop=5;
-nsamp_per_pop=50;
-nclusters = 4
-maxscale = 10
-# omega is defined to be the admixture proportions
-# size = nsamp * nclusters
-omega = matrix(rbind(rdirichlet(nsamp_per_pop,sample(1:maxscale, replace=T, nclusters)),
-                        rdirichlet(nsamp_per_pop,sample(1:maxscale, replace=T, nclusters)),
-                        rdirichlet(nsamp_per_pop,sample(1:maxscale, replace=T, nclusters)),
-                        rdirichlet(nsamp_per_pop,sample(1:maxscale, replace=T, nclusters)),
-                        rdirichlet(nsamp_per_pop,sample(1:maxscale, replace=T, nclusters))), 
-                        nrow=(nsamp_per_pop*npop));
-
-
-simulate_allele_freq <- function(alpha, nSNPs){
-  #mu = 1.25e-8
-  #alpha = 4*Ne*mu
-  beta = alpha
-  return(rbeta(nSNPs, shape1 = alpha, shape2 = beta))
-}
-
-# we're working with genotype data so equal number of variants across freq range
-alpha <- c(1,1,1,1);
-
-# size = nclusters x nSNPs
-freq_mat <- t(matrix(unlist(lapply(1:nclusters, function(n) simulate_allele_freq(alpha[n],nSNPs =5))),ncol=nclusters));
-
 simulate_binomial_model <- function(omega, freq_mat)
 {
   # nsamp: the number of samples
@@ -46,4 +19,3 @@ simulate_binomial_model <- function(omega, freq_mat)
   return(sim_data)
 }
 
-data <- simulate_binomial_model(omega,freq_mat)
