@@ -9,7 +9,7 @@ reverse_transform=function(x)
   out=array(0,length(x)-1);
   for(k in 2:length(x))
   {
-    out[k-1]=log((x[k]+1e-15)/(x[1]+1e-15));
+    out[k-1]=log((abs(x[k])+1e-7)/(abs(x[1])+1e-7));
   }
   return(out)
 }
