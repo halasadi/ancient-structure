@@ -18,57 +18,82 @@ update_EM <- function(q_in, f_unknown_in, f_known_in, geno_data)
   K_known <- dim(f_known_in)[2];
   K_unknown <- dim(f_unknown_in)[2];
   
+###   Deriving a using for loop without vectorization and paralleization (commented)
+  
+#  a <- array(0, c(nsamp, nSNPs, K_pooled));
+  
+#  for(i in 1:nsamp)
+#  {
+#    for(j in 1:nSNPs)
+#    {
+#      a[i,j,] = geno_data[i,j]* (q_in[i,]*f_pooled_in[j,])/(q_in[i,]%*%f_pooled_in[j,]);
+#    }
+#  }
+  
+###   Deriving a using  vectorization and paralleization 
+  
+  
   a <- array(0, c(nsamp, nSNPs, K_pooled));
   
-  for(i in 1:nsamp)
+  a_outer <- mclapply(1:nsamp, function(i) sweep((geno_data[i,]*(matrix(rep(q_in[i,],nSNPs),nrow=nSNPs,byrow=TRUE)*f_pooled_in)),1,(q_in[i,]%*%t(f_pooled_in)),'/'));
+  
+  for(n in 1:nsamp)
   {
-    for(j in 1:nSNPs)
-    {
-      a[i,j,] = geno_data[i,j]* (q_in[i,]*f_pooled_in[j,])/(q_in[i,]%*%f_pooled_in[j,]);
-    }
+    a[n,,] <- a_outer[[n]];
   }
   
   
-#  a_outer<- array(0, c(dim(q_in)[1], dim(f_pooled_in)[1], dim(f_pooled_in)[2]));
+###   Deriving b using for loop without vectorization and paralleization (commented)
   
-#  for(i in 1:dim(q_in)[1])
+#  b <- array(0, c(nsamp, nSNPs, K_pooled));
+  
+#  for(i in 1:nsamp)
 #  {
-#    a_outer[i,,] = (geno_data[i,]*(q_in[i,]*f_pooled_in))/matrix(rep(t(q_in[i,]%*%t(f_pooled_in)),dim(f_pooled_in)[2]),nrow=dim(f_pooled_in)[1])
+#    for(j in 1:nSNPs)
+#    {
+#      b[i,j,] = (2-geno_data[i,j])* (q_in[i,]*(1-f_pooled_in[j,]))/(q_in[i,]%*%(1-f_pooled_in[j,]));
+#    }
 #  }
+  
+  
+## Deriving b using vectorization on SNPs and parallelization on the samples 
   
   b <- array(0, c(nsamp, nSNPs, K_pooled));
   
-  for(i in 1:nsamp)
+  b_outer <- mclapply(1:nsamp, function(i) sweep(((2-geno_data[i,])*(matrix(rep(q_in[i,],nSNPs),nrow=nSNPs,byrow=TRUE)*(1-f_pooled_in))),1,(q_in[i,]%*%t((1-f_pooled_in))),'/'));
+  
+  for(n in 1:nsamp)
   {
-    for(j in 1:nSNPs)
-    {
-      b[i,j,] = (2-geno_data[i,j])* (q_in[i,]*(1-f_pooled_in[j,]))/(q_in[i,]%*%(1-f_pooled_in[j,]));
-    }
+    b[n,,] <- b_outer[[n]];
   }
   
   f_unknown_out <- matrix(nrow=nSNPs,ncol=0)
   f_known_out <- f_known_in;
   
   if (K_unknown != 0){
-    f_unknown_out <- array(0, c(nSNPs,K_unknown));
-    
-    for (j in 1:nSNPs)
-    {
-      for(k in 1:K_unknown){
-        f_unknown_out[j,k] <- sum(a[,j,k])/(sum(a[,j,k])+sum(b[,j,k]));
-      }
-    }
+    f_unknown_out <- sapply(1:K_unknown, function(k) colSums(a[,,k])/(colSums(a[,,k])+colSums(b[,,k])))
+#    f_unknown_out <- array(0, c(nSNPs,K_unknown));
+#    for (j in 1:nSNPs)
+#    {
+#      for(k in 1:K_unknown){
+#        f_unknown_out[j,k] <- sum(a[,j,k])/(sum(a[,j,k])+sum(b[,j,k]));
+#      }
+#    }
     
   }
   
-  q_out <- array(0, c(nsamp,K_pooled))
   
-  for (i in 1:nsamp)
-  {
-    for(k in 1:K_pooled){
-      q_out[i,k] <- 0.5 * mean(a[i,,k]) + 0.5* mean(b[i,,k]);
-    }
-  }
+  
+  q_out <- t(sapply(1:nsamp, function(i) 0.5 * colMeans(a[i,,], ) + 0.5* colMeans(b[i,,])));
+  
+  
+# q_out <- array(0, c(nsamp,K_pooled))
+#  for (i in 1:nsamp)
+#  {
+#    for(k in 1:K_pooled){
+#      q_out[i,k] <- 0.5 * mean(a[i,,k]) + 0.5* mean(b[i,,k]);
+#    }
+#  }
   
   
   out <- list("f_unknown"=f_unknown_out,"f_known"=f_known_out,"q"=q_out);

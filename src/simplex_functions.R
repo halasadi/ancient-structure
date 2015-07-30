@@ -6,12 +6,7 @@
 
 reverse_transform=function(x) 
 {
-  out=array(0,length(x)-1);
-  for(k in 2:length(x))
-  {
-    out[k-1]=log((abs(x[k])+1e-7)/(abs(x[1])+1e-7));
-  }
-  return(out)
+  return(log((abs(x[2:length(x)])+1e-7)/(abs(x[1])+1e-7)));
 }
 
 # the transform function simplexes a vector

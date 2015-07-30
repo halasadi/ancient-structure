@@ -4,6 +4,7 @@
 #setwd('/Users/kushal/Documents/ancient-structure/src')
 library(gtools)
 library(SQUAREM)
+library(parallel)
 source('update_EM.R')
 source('update_squarem.R')
 source('simulate_model.R')
@@ -11,7 +12,7 @@ source('loglik_em.R')
 source('simplex_functions.R')
 
 npop=5;
-nsamp_per_pop=50;
+nsamp_per_pop=100;
 nclusters = 3
 maxscale = 10
 # omega is defined to be the admixture proportions
@@ -33,7 +34,7 @@ simulate_allele_freq <- function(alpha, nSNPs){
 alpha <- c(1,1,1,1);
 
 # size = nclusters x nSNPs
-freq_mat <- t(matrix(unlist(lapply(1:nclusters, function(n) simulate_allele_freq(alpha[n],nSNPs = 200))),ncol=nclusters));
+freq_mat <- t(matrix(unlist(lapply(1:nclusters, function(n) simulate_allele_freq(alpha[n],nSNPs = 1000))),ncol=nclusters));
 
 
 data <- simulate_binomial_model(omega,freq_mat)
@@ -89,10 +90,12 @@ ancient_structure <- function(geno_data, f_known, K_unknown, max_iter)
   
 }
 
-K_known = 1
-K_unknown = 2;
+K_known = 2
+K_unknown = 1;
 K_pooled <- K_known +K_unknown;
+system.time(
 out <- ancient_structure(geno_data = data, f_known = t(freq_mat[(K_unknown+1):K_pooled,]), K_unknown = K_unknown, max_iter = 500)
+)
 
 barplot(t(omega),col=2:(nclusters+1),axisnames=F,space=0,border=NA,main=paste("true structure: No. of clusters=",nclusters),las=1,ylim=c(0,1),cex.axis=1.5,cex.main=1.4)
 barplot(t(out$q),col=2:(nclusters+1),axisnames=F,space=0,border=NA,main=paste("estd structure: No. of clusters=",nclusters),las=1,ylim=c(0,1),cex.axis=1.5,cex.main=1.4)
