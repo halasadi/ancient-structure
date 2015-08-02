@@ -2,3 +2,4 @@ scratch/
 external_data/
 internal_data/
 src/.Rhistory
+.DS_Store
