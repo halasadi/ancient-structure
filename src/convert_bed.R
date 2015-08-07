@@ -11,6 +11,6 @@ gm_imputed <- apply(gm,2,function(x)
               return(y);
             })
 
-write.table(gm_imputed, '../external_data/imputed_haak_fig3_genotypes.txt');
+#write.table(gm_imputed, '../external_data/imputed_haak_fig3_genotypes.txt');
 
 

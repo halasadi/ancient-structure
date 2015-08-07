@@ -3,3 +3,4 @@ external_data/
 internal_data/
 src/.Rhistory
 .DS_Store
+exploratory/Treemix/out_stem*

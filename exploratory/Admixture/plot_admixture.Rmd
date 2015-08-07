@@ -1,0 +1,31 @@
+---
+title: 'Admixture: ancient structure'
+author: "Kushal K Dey, Hussein Al asadi"
+date: "August 7, 2015"
+output: html_document
+---
+
+```{r admix, echo=TRUE, eval=TRUE}
+library(data.table)
+K=3;
+P_data <- data.frame(fread(paste0('haak_fig3_set.',K,'.P')));
+Q_data <- data.frame(fread(paste0('haak_fig3_set.',K,'.Q')));
+
+
+barplot(t(Q_data),col=2:(K+1),axisnames=F,space=0,border=NA,main=paste("No. of clusters=",K),las=1,ylim=c(0,1),cex.axis=0.5,cex.main=1.4);
+  
+data.clst <- read.csv('../data.clst', stringsAsFactors = FALSE, header=FALSE, sep = "\t");
+data.fam <- read.table('../haak_fig3_set.fam');
+
+pop_ids <- data.clst[match(data.fam$V2, data.clst$V2),3]
+
+labels = match(unique(pop_ids), pop_ids);
+abline(v=labels-1)
+
+labels_low=labels-1;
+labels_up=c(labels_low[2:length(labels_low)],dim(Q_data)[1]);
+mid_point <- labels_low +0.5*(labels_up-labels_low);
+axis(1,at=mid_point, unique(pop_ids),las=2,cex.axis=0.5);
+
+```
+
