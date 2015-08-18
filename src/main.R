@@ -5,6 +5,7 @@
 library(gtools)
 library(SQUAREM)
 library(parallel)
+library(plyr)
 source('update_EM.R')
 source('update_squarem.R')
 source('simulate_model.R')
