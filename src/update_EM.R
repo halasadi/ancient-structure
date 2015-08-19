@@ -19,14 +19,13 @@ update_EM <- function(q_in, f_unknown_in, f_known_in, geno_data)
   K_unknown <- dim(f_unknown_in)[2];
   
 ###   Deriving a using for loop without vectorization and paralleization (commented)
-  
-#  a <- array(0, c(nsamp, nSNPs, K_pooled));
+#  a_ser <- array(0, c(nsamp, nSNPs, K_pooled));
   
 #  for(i in 1:nsamp)
 #  {
 #    for(j in 1:nSNPs)
 #    {
-#      a[i,j,] = geno_data[i,j]* (q_in[i,]*f_pooled_in[j,])/(q_in[i,]%*%f_pooled_in[j,]);
+#      a_ser[i,j,] = geno_data[i,j]* (q_in[i,]*f_pooled_in[j,])/(q_in[i,]%*%f_pooled_in[j,]);
 #    }
 #  }
   
@@ -34,24 +33,26 @@ update_EM <- function(q_in, f_unknown_in, f_known_in, geno_data)
   
   
   a <- array(0, c(nsamp, nSNPs, K_pooled));
-  
   a_outer <- mclapply(1:nsamp, function(i) sweep((geno_data[i,]*(matrix(rep(q_in[i,],nSNPs),nrow=nSNPs,byrow=TRUE)*f_pooled_in)),1,(q_in[i,]%*%t(f_pooled_in)),'/'));
-  
   for(n in 1:nsamp)
   {
     a[n,,] <- a_outer[[n]];
   }
   
-  
+  a_outer <- mclapply(1:nsamp, function(i) apply((geno_data[i,]*(matrix(rep(q_in[i,],nSNPs),nrow=nSNPs,byrow=TRUE)*f_pooled_in)),2,'/',(q_in[i,]%*%t(f_pooled_in))),mc.cores=detectCores());
+  for(n in 1:nsamp)
+  {
+    a[n,,] <- a_outer[[n]];
+  }
 ###   Deriving b using for loop without vectorization and paralleization (commented)
   
-#  b <- array(0, c(nsamp, nSNPs, K_pooled));
+#  b_ser <- array(0, c(nsamp, nSNPs, K_pooled));
   
 #  for(i in 1:nsamp)
 #  {
 #    for(j in 1:nSNPs)
 #    {
-#      b[i,j,] = (2-geno_data[i,j])* (q_in[i,]*(1-f_pooled_in[j,]))/(q_in[i,]%*%(1-f_pooled_in[j,]));
+#      b_ser[i,j,] = (2-geno_data[i,j])* (q_in[i,]*(1-f_pooled_in[j,]))/(q_in[i,]%*%(1-f_pooled_in[j,]));
 #    }
 #  }
   
@@ -60,7 +61,7 @@ update_EM <- function(q_in, f_unknown_in, f_known_in, geno_data)
   
   b <- array(0, c(nsamp, nSNPs, K_pooled));
   
-  b_outer <- mclapply(1:nsamp, function(i) sweep(((2-geno_data[i,])*(matrix(rep(q_in[i,],nSNPs),nrow=nSNPs,byrow=TRUE)*(1-f_pooled_in))),1,(q_in[i,]%*%t((1-f_pooled_in))),'/'));
+  b_outer <- mclapply(1:nsamp, function(i) apply(((2-geno_data[i,])*(matrix(rep(q_in[i,],nSNPs),nrow=nSNPs,byrow=TRUE)*(1-f_pooled_in))),2,'/',(q_in[i,]%*%t((1-f_pooled_in)))), mc.cores=detectCores());
   
   for(n in 1:nsamp)
   {
@@ -84,18 +85,7 @@ update_EM <- function(q_in, f_unknown_in, f_known_in, geno_data)
   
   
   
-  q_out <- t(sapply(1:nsamp, function(i) 0.5 * colMeans(a[i,,], ) + 0.5* colMeans(b[i,,])));
-  
-  
-# q_out <- array(0, c(nsamp,K_pooled))
-#  for (i in 1:nsamp)
-#  {
-#    for(k in 1:K_pooled){
-#      q_out[i,k] <- 0.5 * mean(a[i,,k]) + 0.5* mean(b[i,,k]);
-#    }
-#  }
-  
-  
+  q_out <- t(sapply(1:nsamp, function(i) 0.5 * colMeans(a[i,,]) + 0.5* colMeans(b[i,,])));
   out <- list("f_unknown"=f_unknown_out,"f_known"=f_known_out,"q"=q_out);
   return(out)
   
