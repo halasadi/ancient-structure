@@ -1,5 +1,6 @@
 scratch/
-external_data/
+external_data/*
+!external_data/ancestral_freqs.txt
 internal_data/
 src/.Rhistory
 .DS_Store
