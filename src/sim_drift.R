@@ -1,4 +1,5 @@
 source('main.R')
+library('data.table')
 sim_drift<-function(N=40, p0=.2,ngen=100, nSNPs = 1){
   pvec = numeric(nSNPs)
   pvec = p0 	 
@@ -29,15 +30,18 @@ sim_ancient_admix <- function(fa1, fa2, t1, t2, alpha, N, nsamp){
 }
 
 nSNPs = 1000
-fa1 = runif(nSNPs)
+#fa1 = runif(nSNPs)
 #fa2 = runif(nSNPs)
-fa2 = 0.95*fa1 + 0.05*runif(nSNPs, 0, 0.1)
+#fa2 = 0.95*fa1 + 0.05*runif(nSNPs, 0, 0.1)
+
+freq_mat <- data.frame(fread("../external_data/ancestral_freqs.txt"), row.names = TRUE);
+freq_mat <- freq_mat[1:2,1:nSNPs]
 t1 = 10
 t2 = 100
 alpha = 0.5
 nsamp = 100
 N = 1e4
-data = sim_ancient_admix(fa1, fa2, t1, t2, alpha, N, nsamp)
+data = sim_ancient_admix(freq_mat[1,], freq_mat[2,], t1, t2, alpha, N, nsamp)
 
 K_known = 1
 K_unknown = 1
