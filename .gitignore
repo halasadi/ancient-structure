@@ -3,6 +3,11 @@ external_data/*
 !external_data/ancestral_freqs.txt
 internal_data/
 src/.Rhistory
+src/update_EM.R
+src/update_squarem.R
+src/simplex_functions.R
 .DS_Store
 exploratory/Treemix/out_stem*
 exploratory/.Rhistory
+src/loglik_em.R
+src/update_squarem.R

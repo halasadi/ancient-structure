@@ -2,6 +2,7 @@
 ### SQUAREM implementation (Main function)
 
 setwd('/Users/kushal/Documents/ancient-structure/src')
+source('simulate_model.R')
 source('ancient_structure.R');
 ## Assignment operations 
 npop=5;
@@ -38,7 +39,7 @@ K_known = 2
 K_unknown = 1;
 K_pooled <- K_known +K_unknown;
 system.time(
-out <- ancient_structure(geno_data = data, f_known = freq_mat[,(K_unknown+1):K_pooled], K_unknown = K_unknown, max_iter = 100)
+out <- ancient_structure(geno_data = data, f_known = freq_mat[,(K_unknown+1):K_pooled], K_unknown = K_unknown, max_iter = 500)
 )
 
 barplot(t(omega),col=2:(nclusters+1),axisnames=F,space=0,border=NA,main=paste("true structure: No. of clusters=",nclusters),las=1,ylim=c(0,1),cex.axis=1.5,cex.main=1.4)

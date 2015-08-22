@@ -1,33 +1,46 @@
+
+
 library(gtools)
 library(SQUAREM)
 library(parallel)
 library(boot)
 library(plyr)
-source('update_EM.R')
-source('update_squarem.R')
-source('simulate_model.R')
-source('loglik_em.R')
-source('simplex_functions.R')
+source('utilities.R')
+
+# The main function that fits the ancient structure and gives the final topic proportions and allele frequencies
 
 ancient_structure <- function(geno_data, f_known, K_unknown, max_iter, eps=1e-04)
 {
+  
   f_known <- matrix(f_known, nrow=dim(geno_data)[2])
   K_known = dim(f_known)[2]
   K_pooled = K_known + K_unknown
   nsamp <- dim(geno_data)[1];
   nSNPs <- dim(geno_data)[2];
+  
+  # determining initial values of f_unknown and q
+  
   f_unknown_initial = matrix(nrow = nSNPs, ncol = K_unknown, runif(nSNPs*K_unknown))
   q_initial = matrix(nrow = nsamp, ncol = K_pooled, rdirichlet(nsamp, rep(1/K_pooled,K_pooled)));
   rev_q_initial <-as.matrix(t(apply(q_initial, 1, function(x) reverse_transform(x))));
-  # column wise
+  
+  # trying to add some perturbation 'eps' to counter values of 0 and 1 in allele frequencies (eps user defined)
+  
   ind0 <- which(f_known < eps, arr.ind=T);
   ind1 <- which(f_known > (1-eps), arr.ind=T);
   f_known[ind1] = 1-eps
   f_known[ind0] = eps
+  
+  # transforming f_known and f_unknown to logit form to make it unconstrained, needed for squarem input
+  
   logit_f_known <- logit(f_known);
   logit_f_unknown_initial <- logit(f_unknown_initial);
+  
+  # pooling the transformed q and the logit transformed f_known and f_unknown
+  
   param_vec_in <- c(as.vector(rev_q_initial),as.vector(logit_f_unknown_initial),as.vector(logit_f_known));
   
+  # using squarem
   
   res <- squarem(par=as.numeric(param_vec_in),
                  fixptfn=update_squarem,
@@ -50,6 +63,8 @@ ancient_structure <- function(geno_data, f_known, K_unknown, max_iter, eps=1e-04
   #    print(q_temp)}
   
   ## END TESTING ##
+  
+  # transforming q, f_known and f_unknown to user-interpretable format
   
   rev_q = matrix(res$par[(1:(nsamp*(K_pooled-1)))],nrow = nsamp, ncol = (K_pooled-1));
   q <- t(apply(rev_q, 1,function(x) transform(x)));
