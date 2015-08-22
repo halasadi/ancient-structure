@@ -4,7 +4,15 @@ library(SQUAREM)
 # as vector goes column wise
 # param_vec_in <- c(as.vector(q_in),as.vector(f_unknown_in),as.vector(f_known_in));
 
-update_squarem <- function(param_vec_in, geno_data, nsamp = 250, K_unknown = 0, K_known = 4, nSNPs = 5)
+# SQUAREM wrapper function
+
+# @param_vec_in : a vector of size nsamp*n_clus+n_clus_known*n_genes+n_clus_unknown*ngenes: rev_trans(q), logit(f_known), logit(f_unknown) vectorized
+# update_EM is the main function 
+# This function prepares the input for update_EM and then reverse transforms the output for squarem interpolation
+
+
+
+update_squarem <- function(param_vec_in, geno_data, nsamp, K_unknown, K_known, nSNPs)
 {
   K_pooled <- K_known +K_unknown;
   rev_q_in = matrix(param_vec_in[(1:(nsamp*(K_pooled-1)))],nrow = nsamp, ncol = (K_pooled-1));

@@ -12,7 +12,7 @@ simulate_binomial_model <- function(omega, freq_mat)
   # prod[1,1] = \Sum_{k=1}^{k=nclusters} omega_i,k*f(k, 1)
   # where f(k,1) is the frequency of the 1st SNP for the kth cluster.
   # omega_i,k is the proportion of admixture pop k contributes to individual i
-  prod <- omega%*%freq_mat;
+  prod <- omega%*%t(freq_mat);
   
   sim_data <- apply(prod, c(1,2), function(x) rbinom(1,2,x))
   
