@@ -1,7 +1,6 @@
 
 ### SQUAREM implementation (Main function)
 
-setwd('/Users/kushal/Documents/ancient-structure/src')
 source('simulate_model.R')
 source('ancient_structure.R');
 ## Assignment operations 
