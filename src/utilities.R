@@ -40,14 +40,14 @@ loglik_squarem <- function(param_vec_in, geno_data, nsamp, K_unknown, K_known, n
   # extracting the unknown allele frequencies data from the param_vec_in object
   
   temp <- param_vec_in[-(1:(nsamp*(K_pooled-1)))];
-  f_unknown_in <- matrix(temp[0:(nSNPs*K_unknown)], nrow=nSNPs, ncol=K_unknown)
+  f_unknown_in <- inv.logit(matrix(temp[0:(nSNPs*K_unknown)], nrow=nSNPs, ncol=K_unknown))
   
   
   # extracting the known allele frequencies data from the param_vec_in object
   
-  beg = nSNPs*K_unknown + 1
-  end = nSNPs*K_pooled
-  f_known_in <- matrix(temp[beg:end], nrow=nSNPs, ncol=K_known)
+  beg = nSNPs*K_unknown + 1;
+  end = nSNPs*K_pooled;
+  f_known_in <- inv.logit(matrix(temp[beg:end], nrow=nSNPs, ncol=K_known));
   
   # pooling the unknown and known allele frequencies
   
@@ -55,7 +55,7 @@ loglik_squarem <- function(param_vec_in, geno_data, nsamp, K_unknown, K_known, n
   
   # loglikelihood computation
   prod <- q_in %*% t(f_pooled_in);
-  return( sum(log(prod)*geno_data + (2-geno_data)*log(1-prod)))
+  return( -sum(log(prod)*geno_data - (2-geno_data)*log(1-prod)))
 }
 
 library(SQUAREM)
@@ -134,14 +134,16 @@ update_EM <- function(q_in, f_unknown_in, f_known_in, geno_data)
   ###   Deriving a using  vectorization and paralleization 
   
   
-  a <- array(0, c(nsamp, nSNPs, K_pooled));
-  a_outer <- mclapply(1:nsamp, function(i) sweep((geno_data[i,]*(matrix(rep(q_in[i,],nSNPs),nrow=nSNPs,byrow=TRUE)*f_pooled_in)),1,(q_in[i,]%*%t(f_pooled_in)),'/'));
-  for(n in 1:nsamp)
-  {
-    a[n,,] <- a_outer[[n]];
-  }
+# 
+#  a_outer <- mclapply(1:nsamp, function(i) sweep((geno_data[i,]*(matrix(rep(q_in[i,],nSNPs),nrow=nSNPs,byrow=TRUE)*f_pooled_in)),1,(q_in[i,]%*%t(f_pooled_in)),'/'));
+#  for(n in 1:nsamp)
+#  {
+#    a[n,,] <- a_outer[[n]];
+#  }
   
-  a_outer <- mclapply(1:nsamp, function(i) apply((geno_data[i,]*(matrix(rep(q_in[i,],nSNPs),nrow=nSNPs,byrow=TRUE)*f_pooled_in)),2,'/',(q_in[i,]%*%t(f_pooled_in))),mc.cores=detectCores());
+  a <- array(0, c(nsamp, nSNPs, K_pooled));
+  
+  a_outer <- mclapply(1:nsamp, function(i) apply((geno_data[i,]*(matrix(rep(q_in[i,],nSNPs),nrow=nSNPs,byrow=TRUE)*f_pooled_in)),2,'/',(q_in[i,]%*%t(f_pooled_in))),mc.cores = detectCores());
   for(n in 1:nsamp)
   {
     a[n,,] <- a_outer[[n]];
@@ -163,7 +165,7 @@ update_EM <- function(q_in, f_unknown_in, f_known_in, geno_data)
   
   b <- array(0, c(nsamp, nSNPs, K_pooled));
   
-  b_outer <- mclapply(1:nsamp, function(i) apply(((2-geno_data[i,])*(matrix(rep(q_in[i,],nSNPs),nrow=nSNPs,byrow=TRUE)*(1-f_pooled_in))),2,'/',(q_in[i,]%*%t((1-f_pooled_in)))), mc.cores=detectCores());
+  b_outer <- mclapply(1:nsamp, function(i) apply(((2-geno_data[i,])*(matrix(rep(q_in[i,],nSNPs),nrow=nSNPs,byrow=TRUE)*(1-f_pooled_in))),2,'/',(q_in[i,]%*%t((1-f_pooled_in)))),mc.cores=detectCores());
   
   for(n in 1:nsamp)
   {

@@ -9,7 +9,7 @@ source('utilities.R')
 
 # The main function that fits the ancient structure and gives the final topic proportions and allele frequencies
 
-ancient_structure <- function(geno_data, f_known, K_unknown, max_iter, eps=1e-04)
+ancient_structure <- function(geno_data, f_known, K_unknown, max_iter, eps=1e-04, use_squarem=TRUE)
 {
   
   f_known <- matrix(f_known, nrow=dim(geno_data)[2])
@@ -42,41 +42,53 @@ ancient_structure <- function(geno_data, f_known, K_unknown, max_iter, eps=1e-04
   
   # using squarem
   
-  res <- squarem(par=as.numeric(param_vec_in),
-                 fixptfn=update_squarem,
-                 #objfn= loglik_squarem,
-                 geno_data = geno_data,
-                 nsamp = nsamp,
-                 nSNPs = nSNPs,
-                 K_unknown = K_unknown,
-                 K_known = K_known,
-                 control=list(maxiter = max_iter, trace = FALSE));
+  if(use_squarem)
+  {
+    res <- squarem(par=as.numeric(param_vec_in),
+                   fixptfn=update_squarem,
+                   objfn= loglik_squarem,
+                   geno_data = geno_data,
+                   nsamp = nsamp,
+                   nSNPs = nSNPs,
+                   K_unknown = K_unknown,
+                   K_known = K_known,
+                   control=list(maxiter = max_iter, trace = FALSE, square=FALSE, tol=1e-10));
+    rev_q = matrix(res$par[(1:(nsamp*(K_pooled-1)))],nrow = nsamp, ncol = (K_pooled-1));
+    q <- t(apply(rev_q, 1,function(x) transform(x)));
+    # q = matrix(res$par[(1:(nsamp*K_pooled))],nrow = nsamp, ncol = K_pooled);
+    temp <- res$par[-(1:(nsamp*(K_pooled-1)))];
+    f_unknown <- inv.logit(matrix(temp[0:(nSNPs*K_unknown)], nrow=nSNPs, ncol=K_unknown))
+    beg = nSNPs*K_unknown + 1;
+    end = nSNPs*K_pooled;
+    f_known <- inv.logit(matrix(temp[beg:end], nrow=nSNPs, ncol=K_known))
+    
+    out <- list("q"=q, "f_known"=f_known,"f_unknown"=f_unknown);
+    
+    return(out)
+  }
   
-  ## TESTING ##
+  if(!use_squarem)
+  {
+    for(iter in 1:max_iter) { 
+      out = update_squarem(param_vec_in, geno_data, nsamp, K_unknown, K_known, nSNPs);
+      loglik <- loglik_squarem(param_vec_in, geno_data, nsamp, K_unknown, K_known, nSNPs);
+      print(loglik)
+      param_vec_in <- out; 
+      print(iter);}
+    
+      rev_q = matrix(param_vec_in[(1:(nsamp*(K_pooled-1)))],nrow = nsamp, ncol = (K_pooled-1));
+      q <- t(apply(rev_q, 1,function(x) transform(x)));
+      temp <- param_vec_in[-(1:(nsamp*(K_pooled-1)))];
+      f_unknown <- inv.logit(matrix(temp[0:(nSNPs*K_unknown)], nrow=nSNPs, ncol=K_unknown))
+      beg = nSNPs*K_unknown + 1;
+      end = nSNPs*K_pooled;
+      f_known <- inv.logit(matrix(temp[beg:end], nrow=nSNPs, ncol=K_known))
+      
+      out <- list("q"=q, "f_known"=f_known,"f_unknown"=f_unknown);
+      
+      return(out)
+  }
   
-  #  for(iter in 1:max_iter) { 
-  #    out = update_squarem(param_vec_in, geno_data, nsamp, K_unknown, K_known, nSNPs);
-  #    param_vec_in <- out; 
-  #    print(iter);
-  #    rev_q_temp = matrix(out[(1:(nsamp*(K_pooled-1)))],nrow = nsamp, ncol = (K_pooled-1));
-  #    q_temp <- t(apply(rev_q_temp, 1,function(x) transform(x)));
-  #    print(q_temp)}
-  
-  ## END TESTING ##
-  
-  # transforming q, f_known and f_unknown to user-interpretable format
-  
-  rev_q = matrix(res$par[(1:(nsamp*(K_pooled-1)))],nrow = nsamp, ncol = (K_pooled-1));
-  q <- t(apply(rev_q, 1,function(x) transform(x)));
-  # q = matrix(res$par[(1:(nsamp*K_pooled))],nrow = nsamp, ncol = K_pooled);
-  temp <- res$par[-(1:(nsamp*(K_pooled-1)))];
-  f_unknown <- inv.logit(matrix(temp[0:(nSNPs*K_unknown)], nrow=nSNPs, ncol=K_unknown))
-  beg = nSNPs*K_unknown + 1;
-  end = nSNPs*K_pooled;
-  f_known <- inv.logit(matrix(temp[beg:end], nrow=nSNPs, ncol=K_known))
-  
-  out <- list("q"=q, "f_known"=f_known,"f_unknown"=f_unknown);
-  
-  return(out)
+
   
 }
