@@ -9,7 +9,7 @@ source('utilities.R')
 
 # The main function that fits the ancient structure and gives the final topic proportions and allele frequencies
 
-ancient_structure <- function(geno_data, f_known, K_unknown, max_iter, eps=1e-04, use_squarem=TRUE)
+ancient_structure <- function(geno_data, f_known, K_unknown, max_iter, eps=1e-04, use_squarem=FALSE)
 {
   
   f_known <- matrix(f_known, nrow=dim(geno_data)[2])

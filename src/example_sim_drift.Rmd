@@ -4,7 +4,7 @@ output: html_document
 ---
 
 
-```{r, echo = FALSE, cache=TRUE}
+```{r, echo = FALSE, cache=FALSE}
 ######## LOAD FUNCTIONS  #######
 
 rm(list = ls())
@@ -60,20 +60,20 @@ removeDup <- function(M){
 }
 ```
 
-```{r, echo=FALSE, cache=TRUE}
+```{r, echo=FALSE, cache=FALSE}
 ########### SET UP DATA ############
 
 nSNPs = 10000
 
-#fa1 = runif(nSNPs)
-#fa2 = runif(nSNPs)
+fa1 = runif(nSNPs)
+fa2 = runif(nSNPs)
 #fa2 = 0.95*fa1 + 0.05*runif(nSNPs, 0, 0.1)
 
-a_freq <- as.matrix(data.frame(fread("../external_data/ancestral_freqs.txt"), row.names = TRUE));
-a_freq <- a_freq[1:2,-removeDup(a_freq)]
-a_freq <- a_freq[,1:nSNPs]
-fa1 = as.numeric(a_freq[1,])
-fa2 = as.numeric(a_freq[2,])
+#a_freq <- as.matrix(data.frame(fread("../external_data/ancestral_freqs.txt"), row.names = TRUE));
+#a_freq <- a_freq[1:2,-removeDup(a_freq)]
+#a_freq <- a_freq[,1:nSNPs]
+#fa1 = as.numeric(a_freq[1,])
+#fa2 = as.numeric(a_freq[2,])
 ```
 
 
@@ -93,7 +93,7 @@ K_known = 2
 K_unknown = 0
 K_pooled = K_known + K_unknown
 freq_mat = as.matrix(rbind(fa1, fa2))
-out <- ancient_structure(geno_data = data, f_known = t(freq_mat), K_unknown = K_unknown, max_iter = 100)
+out <- ancient_structure(geno_data = data, f_known = t(freq_mat), K_unknown = K_unknown, max_iter = 20)
 barplot(t(out$q),col=2:(K_pooled+1),axisnames=F,space=0,border=NA,main=paste("estd structure: No. of clusters=",K_pooled),
         las=1,ylim=c(0,1),cex.axis=1.5,cex.main=1.4)
 
