@@ -72,9 +72,9 @@ ancient_structure <- function(geno_data, f_known, K_unknown, max_iter, eps=1e-04
     for(iter in 1:max_iter) { 
       out = update_squarem(param_vec_in, geno_data, nsamp, K_unknown, K_known, nSNPs);
       loglik <- loglik_squarem(param_vec_in, geno_data, nsamp, K_unknown, K_known, nSNPs);
-      print(loglik)
+      cat('Neg Loglikelihood at iteration',iter,':',loglik,'\n');
       param_vec_in <- out; 
-      print(iter);}
+      }
     
       rev_q = matrix(param_vec_in[(1:(nsamp*(K_pooled-1)))],nrow = nsamp, ncol = (K_pooled-1));
       q <- t(apply(rev_q, 1,function(x) transform(x)));

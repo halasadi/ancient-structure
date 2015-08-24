@@ -104,6 +104,15 @@ update_squarem <- function(param_vec_in, geno_data, nsamp, K_unknown, K_known, n
 ## Topic model fit with known ancestral allele frequencies and unknown ancestral allele 
 ## frequencies 
 
+getNCols <- function(M){
+  if (is.null(ncol(M))){
+    return(0)
+  }
+  else{
+    return(ncol(M))
+  }
+}
+
 update_EM <- function(q_in, f_unknown_in, f_known_in, geno_data)
   # q_in: topic proportions (n x k)
   # f_unknown: allele frequences of the unknown ancestral populations (nSNPs x k_unknown)
@@ -115,11 +124,12 @@ update_EM <- function(q_in, f_unknown_in, f_known_in, geno_data)
   f_pooled_in <- cbind(f_unknown_in, f_known_in);
   nSNPs = dim(f_pooled_in)[1]
   nsamp = dim(q_in)[1]
-  K_pooled = dim(f_pooled_in)[2] 
+  K_pooled = getNCols(f_pooled_in)
   
-  K_known <- dim(f_known_in)[2];
-  K_unknown <- dim(f_unknown_in)[2];
-  
+  K_known <- getNCols(f_known_in);
+  K_unknown <- getNCols(f_unknown_in);
+
+
   ###   Deriving a using for loop without vectorization and paralleization (commented)
   #  a_ser <- array(0, c(nsamp, nSNPs, K_pooled));
   
