@@ -30,7 +30,7 @@ freq_mat <- freq_mat[,-snpsToRemove]
 data <- data[,1:20000]
 freq_mat <- freq_mat[1:2,1:20000]
 
-K_unknown = 1;
+K_unknown = 0;
 
 out <- ancient_structure(geno_data = data, f_known = t(freq_mat), K_unknown = K_unknown, max_iter = 100, eps=1e-02, use_squarem=FALSE)
 
