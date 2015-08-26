@@ -76,11 +76,12 @@ fa1 = as.numeric(a_freq[1,])
 fa2 = as.numeric(a_freq[2,])
 ```
 
-## Simulations under drift
+# Simulations under drift
 
 Global parametes: Population size = 1e4 and number of samples from each currenty day population is 100 for a total of 300 populations. And the two ancestral frequencies are from Haak et al, 2015 (Yamanaya and WHG)
 
 
+## K_known = 2, K_unknown = 0
 ### (a)
 t1 = 100, t2 = 100, alpha = 0.5
 
@@ -99,7 +100,7 @@ K_pooled = K_known + K_unknown
 #fa2 = fa2[-snpsToRemove]
 data = sim_ancient_admix(fa1, fa2, t1, t2, alpha, N, nsamp)
 freq_mat = as.matrix(rbind(fa1, fa2))
-out <- ancient_structure(geno_data = data, f_known = t(freq_mat), K_unknown = K_unknown, max_iter = 50)
+out <- ancient_structure(geno_data = data, f_known = t(freq_mat), K_unknown = K_unknown, max_iter = 100)
 barplot(t(out$q),col=2:(K_pooled+1),axisnames=F,space=0,border=NA,main=paste("estd structure: No. of clusters=",K_pooled),
         las=1,ylim=c(0,1),cex.axis=1.5,cex.main=1.4)
 
@@ -113,7 +114,7 @@ t1 = 100
 t2 = 100
 alpha = 0.1
 data = sim_ancient_admix(fa1, fa2, t1, t2, alpha, N, nsamp)
-out <- ancient_structure(geno_data = data, f_known = t(freq_mat), K_unknown = K_unknown, max_iter = 50)
+out <- ancient_structure(geno_data = data, f_known = t(freq_mat), K_unknown = K_unknown, max_iter = 100)
 barplot(t(out$q),col=2:(K_pooled+1),axisnames=F,space=0,border=NA,main=paste("estd structure: No. of clusters=",K_pooled),
         las=1,ylim=c(0,1),cex.axis=1.5,cex.main=1.4)
 
@@ -127,7 +128,7 @@ t1 = 250
 t2 = 250
 alpha = 0.5
 data = sim_ancient_admix(fa1, fa2, t1, t2, alpha, N, nsamp)
-out <- ancient_structure(geno_data = data, f_known = t(freq_mat), K_unknown = K_unknown, max_iter = 50)
+out <- ancient_structure(geno_data = data, f_known = t(freq_mat), K_unknown = K_unknown, max_iter = 100)
 barplot(t(out$q),col=2:(K_pooled+1),axisnames=F,space=0,border=NA,main=paste("estd structure: No. of clusters=",K_pooled),
         las=1,ylim=c(0,1),cex.axis=1.5,cex.main=1.4)
 ```
@@ -140,7 +141,7 @@ t1 = 1
 t2 = 300
 alpha = 0.5
 data = sim_ancient_admix(fa1, fa2, t1, t2, alpha, N, nsamp)
-out <- ancient_structure(geno_data = data, f_known = t(freq_mat), K_unknown = K_unknown, max_iter = 50)
+out <- ancient_structure(geno_data = data, f_known = t(freq_mat), K_unknown = K_unknown, max_iter = 100)
 barplot(t(out$q),col=2:(K_pooled+1),axisnames=F,space=0,border=NA,main=paste("estd structure: No. of clusters=",K_pooled),
         las=1,ylim=c(0,1),cex.axis=1.5,cex.main=1.4)
 ```
@@ -153,12 +154,12 @@ t1 = 300
 t2 = 1
 alpha = 0.5
 data = sim_ancient_admix(fa1, fa2, t1, t2, alpha, N, nsamp)
-out <- ancient_structure(geno_data = data, f_known = t(freq_mat), K_unknown = K_unknown, max_iter = 50)
+out <- ancient_structure(geno_data = data, f_known = t(freq_mat), K_unknown = K_unknown, max_iter = 100)
 barplot(t(out$q),col=2:(K_pooled+1),axisnames=F,space=0,border=NA,main=paste("estd structure: No. of clusters=",K_pooled),
         las=1,ylim=c(0,1),cex.axis=1.5,cex.main=1.4)
 ```
 
-## Now, K_known = 1 and K_unknown = 1
+## K_known = 1 and K_unknown = 1
 
 ### (a-2) 
 t1 = 100, t2 = 100, alpha = 0.5
@@ -172,7 +173,7 @@ t2 = 100
 alpha = 0.5
 data = sim_ancient_admix(fa1, fa2, t1, t2, alpha, N, nsamp)
 freq_mat = fa1
-out <- ancient_structure(geno_data = data, f_known = t(freq_mat), K_unknown = K_unknown, max_iter = 50)
+out <- ancient_structure(geno_data = data, f_known = t(freq_mat), K_unknown = K_unknown, max_iter = 100)
 barplot(t(out$q),col=2:(K_pooled+1),axisnames=F,space=0,border=NA,main=paste("estd structure: No. of clusters=",K_pooled),
         las=1,ylim=c(0,1),cex.axis=1.5,cex.main=1.4)
 
@@ -186,7 +187,7 @@ t1 = 100
 t2 = 100
 alpha = 0.1
 data = sim_ancient_admix(fa1, fa2, t1, t2, alpha, N, nsamp)
-out <- ancient_structure(geno_data = data, f_known = t(freq_mat), K_unknown = K_unknown, max_iter = 50)
+out <- ancient_structure(geno_data = data, f_known = t(freq_mat), K_unknown = K_unknown, max_iter = 100)
 barplot(t(out$q),col=2:(K_pooled+1),axisnames=F,space=0,border=NA,main=paste("estd structure: No. of clusters=",K_pooled),
         las=1,ylim=c(0,1),cex.axis=1.5,cex.main=1.4)
 
@@ -200,7 +201,7 @@ t1 = 250
 t2 = 250
 alpha = 0.5
 data = sim_ancient_admix(fa1, fa2, t1, t2, alpha, N, nsamp)
-out <- ancient_structure(geno_data = data, f_known = t(freq_mat), K_unknown = K_unknown, max_iter = 50)
+out <- ancient_structure(geno_data = data, f_known = t(freq_mat), K_unknown = K_unknown, max_iter = 100)
 barplot(t(out$q),col=2:(K_pooled+1),axisnames=F,space=0,border=NA,main=paste("estd structure: No. of clusters=",K_pooled),
         las=1,ylim=c(0,1),cex.axis=1.5,cex.main=1.4)
 ```
@@ -213,7 +214,7 @@ t1 = 1
 t2 = 300
 alpha = 0.5
 data = sim_ancient_admix(fa1, fa2, t1, t2, alpha, N, nsamp)
-out <- ancient_structure(geno_data = data, f_known = t(freq_mat), K_unknown = K_unknown, max_iter = 50)
+out <- ancient_structure(geno_data = data, f_known = t(freq_mat), K_unknown = K_unknown, max_iter = 100)
 barplot(t(out$q),col=2:(K_pooled+1),axisnames=F,space=0,border=NA,main=paste("estd structure: No. of clusters=",K_pooled),
         las=1,ylim=c(0,1),cex.axis=1.5,cex.main=1.4)
 ```
@@ -226,14 +227,14 @@ t1 = 300
 t2 = 1
 alpha = 0.5
 data = sim_ancient_admix(fa1, fa2, t1, t2, alpha, N, nsamp)
-out <- ancient_structure(geno_data = data, f_known = t(freq_mat), K_unknown = K_unknown, max_iter = 50)
+out <- ancient_structure(geno_data = data, f_known = t(freq_mat), K_unknown = K_unknown, max_iter = 100)
 barplot(t(out$q),col=2:(K_pooled+1),axisnames=F,space=0,border=NA,main=paste("estd structure: No. of clusters=",K_pooled),
         las=1,ylim=c(0,1),cex.axis=1.5,cex.main=1.4)
 ```
 
-## Now, we highlight the problems that arise from drift
 
-### (f) without drift K_known = 2, K_uknown = 1
+## K_known = 2 and K_unknown = 1
+### (f) 
 t1 = 1, t2 =1 , alpha = 0.5
 
 ```{r, echo = FALSE, results = 'hide', cache=TRUE}
@@ -248,13 +249,13 @@ K_pooled = K_known + K_unknown
 
 data = sim_ancient_admix(fa1, fa2, t1, t2, alpha, N, nsamp)
 freq_mat = as.matrix(rbind(fa1, fa2))
-out <- ancient_structure(geno_data = data, f_known = t(freq_mat), K_unknown = K_unknown, max_iter = 50)
+out <- ancient_structure(geno_data = data, f_known = t(freq_mat), K_unknown = K_unknown, max_iter = 100)
 barplot(t(out$q),col=2:(K_pooled+1),axisnames=F,space=0,border=NA,main=paste("estd structure: No. of clusters=",K_pooled),
         las=1,ylim=c(0,1),cex.axis=1.5,cex.main=1.4)
 
 ```
 
-### with significant drift
+### (g)
 t1 = 250, t2 =250, alpha = 0.5,
 
 ```{r, echo=FALSE, results = 'hide', cache=TRUE}
@@ -263,13 +264,13 @@ t2 = 250
 alpha = 0.5
 data = sim_ancient_admix(fa1, fa2, t1, t2, alpha, N, nsamp)
 freq_mat = as.matrix(rbind(fa1, fa2))
-out <- ancient_structure(geno_data = data, f_known = t(freq_mat), K_unknown = K_unknown, max_iter = 50)
+out <- ancient_structure(geno_data = data, f_known = t(freq_mat), K_unknown = K_unknown, max_iter = 100)
 barplot(t(out$q),col=2:(K_pooled+1),axisnames=F,space=0,border=NA,main=paste("estd structure: No. of clusters=",K_pooled),
         las=1,ylim=c(0,1),cex.axis=1.5,cex.main=1.4)
 
 ```
 
-### with significant drift
+### (h)
 
 t1=10, t2 = 300, alpha = 0.5
 
@@ -279,7 +280,54 @@ t2 = 300
 alpha = 0.5
 data = sim_ancient_admix(fa1, fa2, t1, t2, alpha, N, nsamp)
 freq_mat = as.matrix(rbind(fa1, fa2))
-out <- ancient_structure(geno_data = data, f_known = t(freq_mat), K_unknown = K_unknown, max_iter = 50)
+out <- ancient_structure(geno_data = data, f_known = t(freq_mat), K_unknown = K_unknown, max_iter = 100)
+barplot(t(out$q),col=2:(K_pooled+1),axisnames=F,space=0,border=NA,main=paste("estd structure: No. of clusters=",K_pooled),
+        las=1,ylim=c(0,1),cex.axis=1.5,cex.main=1.4)
+
+```
+
+# Now with sampling error and drfit
+
+### (I)
+t1 = 200, t2 =200 , alpha = 0.5, K_known = 2, K_unknown = 0
+
+```{r, echo = FALSE, results = 'hide', cache=TRUE}
+t1 = 200
+t2 = 200
+alpha = 0.5
+nsamp = 100
+N = 1e4
+K_known = 2
+K_unknown = 0
+K_pooled = K_known + K_unknown
+fa1obs = rnorm(fa1, sd = sqrt(fa1*(1-fa1)/10))
+fa2obs = rnorm(fa2, sd = sqrt(fa2*(1-fa2)/10))
+data = sim_ancient_admix(fa1, fa2, t1, t2, alpha, N, nsamp)
+freq_mat = as.matrix(rbind(fa1obs, fa2obs))
+out <- ancient_structure(geno_data = data, f_known = t(freq_mat), K_unknown = K_unknown, max_iter = 100)
+barplot(t(out$q),col=2:(K_pooled+1),axisnames=F,space=0,border=NA,main=paste("estd structure: No. of clusters=",K_pooled),
+        las=1,ylim=c(0,1),cex.axis=1.5,cex.main=1.4)
+
+```
+
+### (J)
+
+t1 = 200, t2 =200 , alpha = 0.5, K_known = 1, K_unknown = 1
+
+```{r, echo = FALSE, results = 'hide', cache=TRUE}
+t1 = 200
+t2 = 200
+alpha = 0.5
+nsamp = 100
+N = 1e4
+K_known = 1
+K_unknown = 1
+K_pooled = K_known + K_unknown
+
+data = sim_ancient_admix(fa1, fa2, t1, t2, alpha, N, nsamp)
+fa1obs = rnorm(fa1, sd = sqrt(fa1*(1-fa1)/10))
+freq_mat = fa1obs
+out <- ancient_structure(geno_data = data, f_known = t(freq_mat), K_unknown = K_unknown, max_iter = 100)
 barplot(t(out$q),col=2:(K_pooled+1),axisnames=F,space=0,border=NA,main=paste("estd structure: No. of clusters=",K_pooled),
         las=1,ylim=c(0,1),cex.axis=1.5,cex.main=1.4)
 
