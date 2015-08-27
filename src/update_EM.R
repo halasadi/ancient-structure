@@ -32,12 +32,14 @@ update_EM <- function(q_in, f_unknown_in, f_known_in, geno_data)
 ###   Deriving a using  vectorization and paralleization 
   
   
+# 
+#  a_outer <- mclapply(1:nsamp, function(i) sweep((geno_data[i,]*(matrix(rep(q_in[i,],nSNPs),nrow=nSNPs,byrow=TRUE)*f_pooled_in)),1,(q_in[i,]%*%t(f_pooled_in)),'/'));
+#  for(n in 1:nsamp)
+#  {
+#    a[n,,] <- a_outer[[n]];
+#  }
+  
   a <- array(0, c(nsamp, nSNPs, K_pooled));
-  a_outer <- mclapply(1:nsamp, function(i) sweep((geno_data[i,]*(matrix(rep(q_in[i,],nSNPs),nrow=nSNPs,byrow=TRUE)*f_pooled_in)),1,(q_in[i,]%*%t(f_pooled_in)),'/'));
-  for(n in 1:nsamp)
-  {
-    a[n,,] <- a_outer[[n]];
-  }
   
   a_outer <- mclapply(1:nsamp, function(i) apply((geno_data[i,]*(matrix(rep(q_in[i,],nSNPs),nrow=nSNPs,byrow=TRUE)*f_pooled_in)),2,'/',(q_in[i,]%*%t(f_pooled_in))),mc.cores=detectCores());
   for(n in 1:nsamp)
