@@ -10,6 +10,7 @@ src/simplex_functions.R
 exploratory/Treemix/out_stem*
 exploratory/.Rhistory
 src/loglik_em.R
-src/update_squarem.R
+src/main.R
+src/run_em.R
 src/*_cache/
 src/*_files/
