@@ -14,3 +14,5 @@ src/main.R
 src/run_em.R
 src/*_cache/
 src/*_files/
+exploratory/plot_exploratory_cache/
+exploratory/plot_exploratory_files/
