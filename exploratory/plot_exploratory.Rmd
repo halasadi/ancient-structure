@@ -1,13 +1,13 @@
 ---
-title: 'Exploratory analysis of ancient data'
-author: "Kushal K Dey, Hussein Al asadi"
-date: "August 7, 2015"
 output: html_document
 ---
 
-## General admixture analysis 
+## Exploratory analysis of Haak Human Origins data 
 
-We used the [software](https://www.genetics.ucla.edu/software/admixture/) by David Alexander (UCLA).
+From the Haak + Human Origins dataset, we extracted overall 403 samples (both modern and ancient)
+ that were used in Figure 1 (Haak et al). There were in total 21 ancient populations with varying sample sizes and 23 modern populations from which the samples were considered. We fitted the admixture model due to David Alexander (UCLA) [software](https://www.genetics.ucla.edu/software/admixture/). We first show the admixture analysis for $K=3,5,7$. 
+ 
+### admixture analysis 
 
 ```{r admix, echo=FALSE, eval=TRUE}
 library(data.table)
@@ -29,16 +29,19 @@ plot_admixture <- function(K, pop_ids)
   Q_data_pop_ancient <- Q_data_pop[match(ancient_pop,rownames(Q_data_pop)),];
   Q_data_pop_modern <-  Q_data_pop[-match(ancient_pop,rownames(Q_data_pop)),];
 
+  par(mfrow=c(1,1))
   barplot(t(Q_data_pop_ancient),col=2:(K+1),axisnames=F,space=0,border=NA,main=paste("Ancient data: No. of clusters=",K),las=1,ylim=c(0,1),cex.axis=0.5,cex.main=1.4);
   abline(v=1:length(ancient_pop))
   mid_point =seq(0.5,dim(Q_data_pop_ancient)[1]-0.5,length.out=dim(Q_data_pop_ancient)[1]);
   axis(1,at=mid_point, ancient_pop,las=2,cex.axis=0.5);
-
+  dev.off()
+  
+  par(mfrow=c(1,1))
   barplot(t(Q_data_pop_modern),col=2:(K+1),axisnames=F,space=0,border=NA,main=paste("Modern data: No. of clusters=",K),las=1,ylim=c(0,1),cex.axis=0.5,cex.main=1.4);
   abline(v=1:length(modern_pop))
   mid_point =seq(0.5,dim(Q_data_pop_modern)[1]-0.5,length.out=dim(Q_data_pop_modern)[1]);
   axis(1,at=mid_point, modern_pop,las=2,cex.axis=0.5);
-
+  dev.off()
 }
 ```
 
@@ -60,8 +63,9 @@ plot_admixture(5,pop_ids)
 plot_admixture(7,pop_ids)
 ```
 
+Next we look at the top Principal components (PC1, PC2 and PC3) of the aggregated modern and ancient data.
 
-## PCA
+### pca
 
 ```{r pca, echo=FALSE, eval=TRUE}
 
@@ -81,12 +85,5 @@ plot_pc(1,3)
 plot_pc(2,3)
 
 
-```
-
-## Treemix
-
-```{r treemix, echo=TRUE, eval=FALSE}
-source("Treemix/plotting_funcs.R")
-plot_tree("Treemix/out_stem")
 ```
 
