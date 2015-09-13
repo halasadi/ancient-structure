@@ -28,14 +28,12 @@ removeDup <- function(M){
 snpsToRemove = removeDup(freq_mat)
 data <- data[,-snpsToRemove]
 freq_mat <- freq_mat[,-snpsToRemove]
-#data <- data[,1:20000]
 
-#freq_mat <- freq_mat[1:K_known,1:10000]
-#data <- data[,1:10000];
+n_obs <- c(18,24,2);
 
-out <- ancient_structure(geno_data = data, f_known = t(freq_mat), K_unknown = K_unknown, max_iter = 2, eps=1e-02, use_squarem=FALSE)
+out <- ancient_structure(geno_data = data, f_obs = t(freq_mat), n_obs = n_obs, K_unknown = K_unknown, max_iter = 2, eps=1e-02, use_squarem=FALSE)
 
-write.table(out$q, file = paste0("../internal_data/q_known_", K_known,
+write.table(out$q, file = paste0("../internal_data/sampling_correction/q_known_", K_known,
                        "_unknown_", K_unknown, ".txt"))
 
 
