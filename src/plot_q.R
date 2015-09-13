@@ -5,8 +5,10 @@ data.fam <- read.table('../exploratory/haak_fig3_set.fam');
 
 pop_ids <- data.clst[match(data.fam$V2, data.clst$V2),3]
 
-Q_data <- as.matrix(read.table("../internal_data/q_one_unknown.txt"));
-K=4
+Q_data <- as.matrix(read.table("../internal_data/q_known_3_unknown_2.txt"));
+#Q_data <- as.matrix(read.table("../exploratory/Admixture/haak_fig3_set.5.Q"))
+
+K=5
 barplot(t(Q_data),col=2:(K+1),axisnames=F,space=0,border=NA,main=paste("No. of clusters=",K),las=1,ylim=c(0,1),cex.axis=0.5,cex.main=1.4);
 
 labels = match(unique(pop_ids), pop_ids);
@@ -26,12 +28,12 @@ Q_data_pop_ancient <- Q_data_pop[match(ancient_pop,rownames(Q_data_pop)),];
 Q_data_pop_modern <-  Q_data_pop[-match(ancient_pop,rownames(Q_data_pop)),];
 
 barplot(t(Q_data_pop_ancient),col=2:(K+1),axisnames=F,space=0,border=NA,main=paste("No. of clusters=",K),las=1,ylim=c(0,1),cex.axis=0.5,cex.main=1.4);
-#abline(v=1:length(ancient_pop))
+abline(v=1:length(ancient_pop))
 mid_point =seq(0.5,dim(Q_data_pop_ancient)[1]-0.5,length.out=dim(Q_data_pop_ancient)[1]);
 axis(1,at=mid_point, ancient_pop,las=2,cex.axis=0.5);
 
 barplot(t(Q_data_pop_modern),col=2:(K+1),axisnames=F,space=0,border=NA,main=paste("No. of clusters=",K),las=1,ylim=c(0,1),cex.axis=0.5,cex.main=1.4);
-#abline(v=1:length(modern_pop))
+abline(v=1:length(modern_pop))
 mid_point =seq(0.5,dim(Q_data_pop_modern)[1]-0.5,length.out=dim(Q_data_pop_modern)[1]);
 axis(1,at=mid_point, modern_pop,las=2,cex.axis=0.5);
 

@@ -33,7 +33,7 @@ freq_mat <- freq_mat[,-snpsToRemove]
 #freq_mat <- freq_mat[1:K_known,1:10000]
 #data <- data[,1:10000];
 
-out <- ancient_structure(geno_data = data, f_known = t(freq_mat), K_unknown = K_unknown, max_iter = 100, eps=1e-02, use_squarem=FALSE)
+out <- ancient_structure(geno_data = data, f_known = t(freq_mat), K_unknown = K_unknown, max_iter = 2, eps=1e-02, use_squarem=FALSE)
 
 write.table(out$q, file = paste0("../internal_data/q_known_", K_known,
                        "_unknown_", K_unknown, ".txt"))
