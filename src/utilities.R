@@ -199,13 +199,7 @@ update_EM <- function(q_in, f_unknown_in, f_known_in, f_obs, n_obs, geno_data)
   }
 
   if(K_known !=0){
-    #f_known_out <- sapply(1:K_known, function(k) (colSums(a[,,k])+n_obs[k]*f_obs[,k])/(colSums(a[,,k])+colSums(b[,,k])+n_obs[k]))
-      for (j in 1:nSNPs)
-      {
-         for(k in 1:K_known){
-                      f_known_out[j,k] <- (sum(a[,j,k+K_unknown]) + n_obs[k]*f_obs[j,k])/(sum(a[,j,k+K_unknown])+sum(b[,j,k+K_unknown])+n_obs[k]);
-           }
-       }
+    f_known_out <- sapply(1:K_known, function(k) (colSums(a[,,k+K_unknown])+n_obs[k]*f_obs[,k])/(colSums(a[,,k+K_unknown])+colSums(b[,,k+K_unknown])+n_obs[k]));
     }
 
   q_out <- t(sapply(1:nsamp, function(i) 0.5 * colMeans(a[i,,]) + 0.5* colMeans(b[i,,])));
