@@ -1,0 +1,68 @@
+\documentclass[11pt, DIV10,a4paper]{article}
+\input{header.tex}
+\begin{document}
+
+\section{ Model 2 - EM model incorporating sample size error}
+
+The E-step log likelihood under the EM algorithm has the following form 
+
+$$ E_{Z,M} | X, f^{(n)}_{k}, Q^{(n)}, F^{(n)}_{u}, F^{(n)}_{k} \left [ log P (X,Z,M, f^{(n)}_{k} | Q^{(n)}, F^{(n)}_{u}, F^{(n)}_{k} )\right ] $$
+
+We first determine the conditional distribution of $Z$ and $M$ given X, Q and F as in Skotte et al 2013. 
+
+$$ P(Z_{ij}=t, M_{ij}=1 | X_{ij}, f^{(n)}_{k}, Q^{(n)}, F^{(n)}_{u}, F^{(n)}_{k} ) = c^{(ijt)}_{n} X_{ij} /2  $$
+
+$$ P(Z_{ij}=t, M_{ij}=0 | X_{ij}, f^{(n)}_{k}, Q^{(n)}, F^{(n)}_{u}, F^{(n)}_{k} ) = d^{(ijt)}_{n} (2 - X_{ij}) /2  $$
+
+\vspace{0.2 in}
+
+When the updates do not distinguish between $F_{k}$ and $F_{u}$, we will use the notation $F$ for the sake of readability.
+
+\vspace{0.2 in}
+
+$$ c^{(ijt)}_{n} = \frac{Q^{n}_{it} F^{(n)}_{j,k}} {\sum_{l} Q^{n}_{il} F^{(n)}_{j,l}} $$
+
+$$ d^{(ijt)}_{n} = \frac{Q^{n}_{it} (1 - F^{(n)}_{j,k})} {\sum_{l} Q^{n}_{il} (1 - F^{(n)}_{j,l})} $$
+
+ In addition,
+ 
+ $$ P(Z_{ij}=t, M_{ij}=1 | Q^{(n)},F^{(n)}) = Q^{n}_{it} F^{(n)}_{j,t} $$
+ 
+ $$ P(Z_{ij}=t, M_{ij}=0 | Q^{(n)},F^{(n)}) = Q^{n}_{it} (1 - F^{(n)}_{j,t}) $$
+  
+  
+We can write down the E step log likelihood in that case as 
+
+\begin{align*}
+& E_{Z,M} | X, f^{(n)}_{k}, Q^{(n)}, F^{(n)}_{u}, F^{(n)}_{k} \left [ log P (X,Z,M, f_{k} | Q, F_{u}, F_{k} )\right ] &  \\
+& =  \qquad E_{Z,M} | X, f^{(n)}_{k}, Q^{(n)}, F^{(n)}_{u}, F^{(n)}_{k} \left [ log P (X,Z,M | Q, F_{u}, F_{k} ) + log P(f_{k}| F_{k}) \right ] \\
+&= \qquad \sum_{i,j} E_{Z_{ij},M_{ij} | X_{ij},f^{(n)}_{k}, Q^{(n)}, F^{(n)}_{u}, F^{(n)}_{k}}  \left [ log P (X_{ij},Z_{ij},M_{ij} | Q,  F_{u}, F_{k} ) \right]  + log P (f_{k} | F_{k}) \\
+& \propto \qquad  \sum_{ij} \sum_{t=1}^{T_u}  \left [ log (q_{it}F^{jt}_{u}) a^{ijt}_{n} + log(q_{it}(1 - F^{(jt)}_{u})) b^{ijt}_{n} \right ]+  \sum_{ij} \sum_{t=1}^{T_k}  \left [ log (q_{it}F^{jt}_{k}) a^{ijt}_{n} + log(q_{it}(1 - F^{(jt)}_{k})) b^{ijt}_{n}  \right ] + \\
+& \qquad \qquad \sum_{j}\sum_{t=1}^{T_{k}}  \left [ f_{jt}n_{t} log(F_{jt}) + n_{t} (1 - f_{jt}) log(1 - F_{jt}) \right ] \\
+\end{align*}
+
+here 
+
+$$ a^{ijt}_{n} = c^{ijt}_{n} X_{ij}/2 $$
+
+$$ b^{ijt}_{n} = d^{ijt}_{n} (2 - X_{ij})/2 $$
+
+Take the derivative with respect to $F_u$ and solve for roots  to get the $(n+1)$ th update of $F_u$ to be 
+
+$$ F^{jt}_{u,(n+1)} =  \frac{\sum_i a^{ijt}_n}{\sum_i a^{ijt}_n + \sum_i b^{ijt}_n} $$
+
+
+Take the derivative with respect to $F_k$ and solve for roots  to get the $(n+1)$ th update of $F_u$ to be 
+
+\begin{align*}
+F^{jt}_{k,(n+1)} & =  \frac{\sum_i a^{ijt}_n + n_t  f_{jt}}{\sum_i a^{ijt}_n + \sum_i b^{ijt}_n + n_t} \\
+& =   \left ( \frac{\sum_i a^{ijt}_n + \sum_i b^{ijt}_n}{\sum_i a^{ijt}_n + \sum_i b^{ijt}_n+n_t} \right )\frac{\sum_i a^{ijt}_n}{\sum_i a^{ijt}_n + \sum_i b^{ijt}_n} + \left ( \frac{n_t}{ \sum_i a^{ijt}_n + \sum_i b^{ijt}_n+n_t} \right ) f_{jt} 
+\end{align*}
+
+Take the derivative with respect to $Q$ with constraints and solve for roots  to get the $(n+1)$ th update of $Q$ to be 
+
+$$ q^{(n+1)}_{it} = \frac{1}{M} \sum_{j=1}^{M} \left ( a^{ijt}_{n} + b^{ijt}_{n} \right ) $$
+
+\end{document}
+
+
