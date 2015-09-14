@@ -1,13 +1,18 @@
 ---
 title: "Ancient-Structure-Matthew"
-output: pdf_document
+output: html_document
 ---
 
 # Goals
 
-We wanted to develop an analogous model to STRUCTURE for ancient DNA data that borrowed information from ancient DNA data to define the clusters in pooled modern + ancient SNP data. We first became interested in this from reading Haak et al 2015 in which they claimed that modern Europeans can be written as a mixture of 3 ancestral source populations and produced the following figure.
+<p>  We want  to develop an analogous model to STRUCTURE for ancient DNA data that borrowed information from ancient DNA data to define the clusters in pooled modern + ancient SNP data. We first became interested in this from reading Haak et al 2015 in which they claimed that modern Europeans can be written as a mixture of 3 ancestral source populations and produced the following figure (Fig 1). </p>
 
-![Haak_fig_3](nature14317-f3.jpg)
+<figure>
+<img src='nature14317-f3.png' alt='Haak et al (2015) figure' width=400 height=200 />
+<figcaption>Fig 1: Haak et al (2015): modern and ancient European populations can be written as a mixture of Yamanaya, LBK-EN and Loschbour </figcaption>
+</figure>
+
+<br> </br>
 
 To estimate the admixture proportions ($\alpha_i$), Haak et al. used the "F4 statistics" concept (a statistic pioneered from their group) where,
 
