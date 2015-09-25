@@ -1,13 +1,14 @@
 ---
 title: "Simulations with Drift and Sampling correction"
-output: html_document
+output: pdf_document
 ---
 
 
 ```{r, echo = FALSE, cache=FALSE}
 ######## LOAD FUNCTIONS  #######
 
-setwd('/Users/kushal/Documents/ancient-structure/src')
+#setwd('/Users/kushal/Documents/ancient-structure/src')
+setwd('/Users/halasadi/ancient-structure/src')
 rm(list = ls())
 library('data.table')
 source('ancient_structure.R');
@@ -302,8 +303,10 @@ N = 1e4
 K_known = 2
 K_unknown = 0
 K_pooled = K_known + K_unknown
-fa1obs = rnorm(fa1, sd = sqrt(fa1*(1-fa1)/10))
-fa2obs = rnorm(fa2, sd = sqrt(fa2*(1-fa2)/10))
+#fa1obs = rnorm(fa1, sd = sqrt(fa1*(1-fa1)/10))
+#fa2obs = rnorm(fa2, sd = sqrt(fa2*(1-fa2)/10))
+fa1obs = rbinom(nSNPs,10,fa1)/(10)
+fa2obs = rbinom(nSNPs,10,fa2)/(10)
 data = sim_ancient_admix(fa1, fa2, t1, t2, alpha, N, nsamp)
 freq_mat = as.matrix(rbind(fa1obs, fa2obs))
 out <- ancient_structure(geno_data = data, f_obs = t(freq_mat), n_obs = n_obs, K_unknown = K_unknown, max_iter = 100)
@@ -327,7 +330,8 @@ K_unknown = 1
 K_pooled = K_known + K_unknown
 
 data = sim_ancient_admix(fa1, fa2, t1, t2, alpha, N, nsamp)
-fa1obs = rnorm(fa1, sd = sqrt(fa1*(1-fa1)/10))
+#fa1obs = rnorm(fa1, sd = sqrt(fa1*(1-fa1)/10))
+fa1obs = rbinom(length(fa1),10,fa1)/(10)
 freq_mat = fa1obs
 out <- ancient_structure(geno_data = data, f_obs = t(freq_mat), n_obs = n_obs, K_unknown = K_unknown, max_iter = 100)
 barplot(t(out$q),col=2:(K_pooled+1),axisnames=F,space=0,border=NA,main=paste("estd structure: No. of clusters=",K_pooled),
