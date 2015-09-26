@@ -1,7 +1,7 @@
 library(snpStats)
-reads <- read.plink(bed="../external_data/haak_fig3_set.bed",
-                    bim="../external_data/haak_fig3_set.bim",
-                    fam="../external_data/haak_fig3_set.fam")
+reads <- read.plink(bed="../external_data/haak_fig3.LDprune.bed",
+                    bim="../external_data/haak_fig3.LDprune.bim",
+                    fam="../external_data/haak_fig3.LDprune.fam")
 gm = as(reads$genotypes, 'numeric')
 
 gm_imputed <- apply(gm,2,function(x)
@@ -11,6 +11,6 @@ gm_imputed <- apply(gm,2,function(x)
               return(y);
             })
 
-#write.table(gm_imputed, '../external_data/imputed_haak_fig3_genotypes.txt');
+write.table(gm_imputed, '../external_data/imputed_haak_fig3_genotypes.txt');
 
 
