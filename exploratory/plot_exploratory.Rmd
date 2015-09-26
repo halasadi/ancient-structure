@@ -96,23 +96,25 @@ Next we look at the top Principal components (PC1, PC2 and PC3) of the aggregate
 
 ### pca
 
-```{r pca, echo=FALSE, eval=FALSE}
+We provide the PC1 vs PC2 comparison for the Haak Human origins data. We applied the PCA on the pooled modern and ancient sample. However, here we break down the graphs separately for the moderns, the ancients and also give the actual whole PCA plot for pooled modern and ancient data.
 
-pca_eigenvalues <- data.frame(read.table('PCA/pca_eigenvalues.txt'));
-pca_eigenvectors <- data.frame(fread('PCA/pca_eigenvectors.txt'), row.names=TRUE);
+The modern data 
 
-plot_pc <- function(lab1,lab2)
-{
-  eigen1 = as.numeric(pca_eigenvectors[,lab1])
-  eigen2 = as.numeric(pca_eigenvectors[,lab2])
-  plot(0, xlim = c(min(eigen1), max(eigen1)), ylim = c(min(eigen2), max(eigen2)),xlab=paste0("PC   ",lab1),ylab=paste0("PC ",lab2));
-  text(eigen1, eigen2 ,pop_ids,cex=0.5)
-}
+<img src='PCA/moderns_PC1_PC2.png' align="middle" style="width:500px;height:300px;">
 
-plot_pc(1,2)
-plot_pc(1,3)
-plot_pc(2,3)
+The ancient data
 
+<img src='PCA/ancients_whole_PC1_PC2.png' align="middle" style="width:500px;height:300px;">
 
+<img src='PCA/ancients_PC1_PC2.png' align ="middle" style="width:500px;height:300px;">
+
+The ancient and modern pooled data 
+
+<img src='PCA/pooled_whole_PC1_PC2.png' align="middle" style="width:500px;height:300px;">
+
+<img src='PCA/pooled_PC1_PC2.png' align="middle"
+style="width:500px;height:300px;">
+
+```{r}
+sessionInfo()
 ```
-
