@@ -5,7 +5,7 @@ library(SQUAREM)
 library(parallel)
 library(boot)
 library(plyr)
-source('utilities_2.R')
+source('utilities.R')
 
 # The main function that fits the ancient structure and gives the final topic proportions and allele frequencies
 

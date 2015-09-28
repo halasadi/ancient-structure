@@ -2,7 +2,7 @@
 ### SQUAREM implementation (Main function)
 set.seed(10)
 source('simulate_model.R')
-source('ancient_structure_2.R');
+source('ancient_structure.R');
 ## Assignment operations
 npop=5;
 nsamp_per_pop=100;
