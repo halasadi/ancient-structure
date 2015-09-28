@@ -18,6 +18,7 @@ for(pop in 1:npop) {
 omega <- rbind(omega,rdirichlet(nsamp_per_pop,sample(1:maxscale, replace=T, nclusters)));
 }
 
+omega <- fix_clus_mem(omega, pop_labs, source_labs);
 simulate_allele_freq <- function(alpha, nSNPs){
   #mu = 1.25e-8
   #alpha = 4*Ne*mu
@@ -38,7 +39,7 @@ K_unknown <- 1
 
 system.time(
 out <- ancient_structure(geno_data = data, K_unknown = K_unknown, pop_labs = pop_labs,
-                         source_labs = source_labs, max_iter = 600, use_squarem=FALSE)
+                         source_labs = source_labs, max_iter = 300, use_squarem=FALSE)
 )
 
 barplot(t(omega),col=2:(nclusters+1),axisnames=F,space=0,border=NA,main=paste("true structure: No. of clusters=",nclusters),las=1,ylim=c(0,1),cex.axis=1.5,cex.main=1.4)

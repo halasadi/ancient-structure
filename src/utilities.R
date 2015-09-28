@@ -1,6 +1,6 @@
 ###  Fixing cluster membership to 100 % for known source pops in omega
 
-fix_clus_mem <- function(omega, pop_labs, source_labs)
+fix_clus_mem <- function(omega, pop_labs, source_labs, eps=1e-04)
 {
   # print("EVERYTHING OK 1")
   omega1 <- omega;
@@ -9,7 +9,8 @@ fix_clus_mem <- function(omega, pop_labs, source_labs)
   if(!is.null(source_labs)){
     for (i in 1:length(source_labs)){
       e_i = rep(0, dim(omega)[2]);
-      e_i[i+k_unknown] = 1;
+      e_i[i+k_unknown] = 1-eps;
+      e_i[-(i+k_unknown)] = rep(eps/(length(e_i)-1), (length(e_i)-1));
       inds = which(row.names(omega) == source_labs[i]);
       omega[inds,] <- do.call("rbind",replicate(length(inds), e_i, simplify=FALSE))
     }
@@ -56,7 +57,7 @@ loglik_squarem <- function(param_vec_in, geno_data, pop_labs, source_labs, K_unk
   
   # transforming the rev_q_in to q_in by adding the sum=1 constraint
   
-  q_in <- fix_clus_mem(t(apply(rev_q_in, 1,function(x) transform(x))), pop_labs, source_labs);
+  q_in <- t(apply(rev_q_in, 1,function(x) transform(x)));
   
   
   # extracting the unknown allele frequencies data from the param_vec_in object
@@ -96,7 +97,7 @@ update_squarem <- function(param_vec_in, geno_data, pop_labs, source_labs, K_unk
   
   # transforming the rev_q_in to q_in by adding the sum=1 constraint
   
-  q_in <- fix_clus_mem(t(apply(rev_q_in, 1,function(x) transform(x))), pop_labs, source_labs);
+  q_in <- t(apply(rev_q_in, 1,function(x) transform(x)));
   
   # extracting the unknown allele frequencies data from the param_vec_in object and inv transforming it
   
@@ -200,7 +201,7 @@ update_EM <- function(q_in, f_pooled_in, pop_labs, source_labs, geno_data)
     #    }
     
   q_out <- t(sapply(1:nsamp, function(i) 0.5 * colMeans(a[i,,]) + 0.5* colMeans(b[i,,])));
-  q_out <- fix_clus_mem(q_out, pop_labs, source_labs);
+ # q_out <- fix_clus_mem(q_out, pop_labs, source_labs);
   out <- list("f_pooled"=f_pooled_out,"q"=q_out);
   return(out)
   

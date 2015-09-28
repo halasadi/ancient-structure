@@ -5,8 +5,8 @@ library(SQUAREM)
 library(parallel)
 library(boot)
 library(plyr)
+set.seed(10)
 source('utilities.R')
-
 # The main function that fits the ancient structure and gives the final topic proportions and allele frequencies
 
 ancient_structure <- function(geno_data, K_unknown, pop_labs, source_labs, max_iter, eps=1e-04, use_squarem=FALSE)
@@ -44,7 +44,7 @@ ancient_structure <- function(geno_data, K_unknown, pop_labs, source_labs, max_i
                    source_labs=source_labs,
                    control=list(maxiter = max_iter, trace = FALSE, square=FALSE, tol=1e-10));
     rev_q = matrix(res$par[(1:(nsamp*(K_pooled-1)))],nrow = nsamp, ncol = (K_pooled-1));
-    q <- fix_clus_mem(t(apply(rev_q, 1,function(x) transform(x))),pop_labs, source_labs);
+    q <- t(apply(rev_q, 1,function(x) transform(x)));
     # q = matrix(res$par[(1:(nsamp*K_pooled))],nrow = nsamp, ncol = K_pooled);
     temp <- res$par[-(1:(nsamp*(K_pooled-1)))];
     f_pooled <- inv.logit(matrix(temp[0:(nSNPs*K_pooled)], nrow=nSNPs, ncol=K_pooled))
@@ -64,7 +64,7 @@ ancient_structure <- function(geno_data, K_unknown, pop_labs, source_labs, max_i
       }
 
       rev_q = matrix(param_vec_in[(1:(nsamp*(K_pooled-1)))],nrow = nsamp, ncol = (K_pooled-1));
-      q <- fix_clus_mem(t(apply(rev_q, 1,function(x) transform(x))),pop_labs, source_labs);
+      q <- t(apply(rev_q, 1,function(x) transform(x)));
       temp <- param_vec_in[-(1:(nsamp*(K_pooled-1)))];
       f_pooled <- inv.logit(matrix(temp[0:(nSNPs*K_pooled)], nrow=nSNPs, ncol=K_pooled))
       outlist <- list("q"=q, "f_pooled"=f_pooled);
