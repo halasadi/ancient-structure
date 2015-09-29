@@ -191,6 +191,13 @@ The ancient and modern pooled data
 <img src='PCA/pooled_PC1_PC2.png' align="middle"
 style="width:500px;height:300px;">
 
+
+Next we just focussed on the modern samples and did a PCA on the modern samples exclusively. Here we plot the PC1 versus PC2 plot for the modern samples only.
+
+<img src='PCA/moderns_only_PC1_PC2.png' align="middle"
+style="width:500px;height:300px;">
+
+
 ```{r}
 sessionInfo()
 ```

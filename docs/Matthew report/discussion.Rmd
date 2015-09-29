@@ -13,8 +13,10 @@ In the real data analysis of model 2, section K_known = 3 & K_unknown = 0, we sa
 
 To illustrate this, we simulate a model in which individuals come from three ancestries A1 at 78%, A2 at 20%, and A3 at 2%, and we only have the frequency of A2 with number of samples = 100, and A3 with number of samples = 10. 
 
-```{r, echo=FALSE, results='hide'}
-setwd('/Users/kushal/Documents/ancient-structure/src')
+
+
+```{r, echo=FALSE, eval=FALSE, results='hide'}
+setwd('/Users/kushal/Documents/ancient-structure/docs/Matthew report/')
 source('ancient_structure.R');
 
 sim_example <- function(fa1, fa2, fa3, nsamp, nSNPs){
@@ -41,7 +43,7 @@ npop <- 3
 pop_labs <- unlist(lapply(1:npop, function(n) rep(toString(n),nsamp[n])));
 source_labs <- c(toString(2), toString(3));
 
-K_unknown = 3
+K_unknown = 1
 freq_mat = as.matrix(rbind(fa2, fa3))
 n_obs = c(100,10);
 
@@ -49,8 +51,8 @@ n_obs = c(100,10);
 #for (k in 1:K_known){
 #  f_obs[,k] = rbinom(nSNPs,2*n_obs[k], freq_mat[,k])/(2*n_obs[k])
 #}
-out <- ancient_structure(geno_data = data, K_unknown = K_unknown, pop_labs =pop_labs, source_labs=NULL, max_iter = 10000)
-K_pooled <- K_unknown
+out <- ancient_structure(geno_data = data, K_unknown = K_unknown, pop_labs =pop_labs, source_labs=c("2","3"), max_iter = 1000)
+K_pooled <- K_unknown+2
 barplot(t(out$q),col=2:(K_pooled+1),axisnames=F,space=0,border=NA,main=paste("estd structure: No. of clusters=",K_pooled),
         las=1,ylim=c(0,1),cex.axis=1.5,cex.main=1.4)
 
@@ -60,6 +62,20 @@ barplot(t(q),col=c(3,2,4),axisnames=F,space=0,border=NA,main=paste("true structu
         las=1,ylim=c(0,1),cex.axis=1.5,cex.main=1.4)
 
 ```
+
+We ran the method fixing the source population admixture proportions to be 1, however it seems the number of iterations needed to converge is pretty big in such a scenario.
+
+We are presenting the Structure plots for iterations $500$, $1000$ and $10000$ for a $500 \times 100$ counts table obtained using the above simulation set up with 3 clusters where all 3 clusters are unknown.
+
+<img src='../../bin/test_run_500_iter.png' style="width:400px;height:300px;">
+<img src='../../bin/test_run_1000_iter.png' style="width:400px;height:300px;">
+<img src='../../bin/test_run_10000_iter.png' style="width:400px;height:300px;">
+
+Next we run the same taking the second and third populations as source populations. So now 
+
+<img src='../../bin/test_run_500_iter_2_known.png' style="width:400px;height:300px;">
+<img src='../../bin/test_run_1000_iter_2_known.png' style="width:400px;height:300px;">
+<img src='../../bin/test_run_10000_iter_2_known.png' style="width:400px;height:300px;">
 
 ## (2) When is another source population necessary?
 
