@@ -5,29 +5,41 @@ library(SQUAREM)
 library(parallel)
 library(boot)
 library(plyr)
-set.seed(10)
-source('utilities.R')
+source('utilities_2.R')
+
 # The main function that fits the ancient structure and gives the final topic proportions and allele frequencies
 
-ancient_structure <- function(geno_data, K_unknown, pop_labs, source_labs, max_iter, eps=1e-04, use_squarem=FALSE)
+ancient_structure <- function(geno_data, f_known, K_unknown, max_iter, eps=1e-04, use_squarem=FALSE)
 {
-  K_known <- length(source_labs);
+
+  f_known <- matrix(f_known, nrow=dim(geno_data)[2])
+  K_known = dim(f_known)[2]
   K_pooled = K_known + K_unknown
   nsamp <- dim(geno_data)[1];
   nSNPs <- dim(geno_data)[2];
 
   # determining initial values of f_unknown and q
-  f_pooled_initial = matrix(nrow = nSNPs, ncol = K_pooled, runif(nSNPs*K_unknown))
+
+  f_unknown_initial = matrix(nrow = nSNPs, ncol = K_unknown, runif(nSNPs*K_unknown))
   q_initial = matrix(nrow = nsamp, ncol = K_pooled, rdirichlet(nsamp, rep(1/K_pooled,K_pooled)));
-  q_initial <- fix_clus_mem(q_initial,pop_labs, source_labs);
-  rev_q_initial <-matrix(t(apply(q_initial, 1, function(x) reverse_transform(x))), nrow=nsamp);
+  rev_q_initial <-as.matrix(t(apply(q_initial, 1, function(x) reverse_transform(x))));
+
+  # trying to add some perturbation 'eps' to counter values of 0 and 1 in allele frequencies (eps user defined)
+  # check that f_known is an empty vector
   
+  ind0 <- which(f_known < eps, arr.ind=T);
+  ind1 <- which(f_known > (1-eps), arr.ind=T);
+  f_known[ind1] = 1-eps
+  f_known[ind0] = eps
+
   # transforming f_known and f_unknown to logit form to make it unconstrained, needed for squarem input
-  logit_f_pooled_initial <- logit(f_pooled_initial);
+
+  logit_f_known <- logit(f_known);
+  logit_f_unknown_initial <- logit(f_unknown_initial);
 
   # pooling the transformed q and the logit transformed f_known and f_unknown
 
-  param_vec_in <- c(as.vector(rev_q_initial),as.vector(logit_f_pooled_initial));
+  param_vec_in <- c(as.vector(rev_q_initial),as.vector(logit_f_unknown_initial),as.vector(logit_f_known));
 
   # using squarem
 
@@ -40,16 +52,21 @@ ancient_structure <- function(geno_data, K_unknown, pop_labs, source_labs, max_i
                    nsamp = nsamp,
                    nSNPs = nSNPs,
                    K_unknown = K_unknown,
-                   pop_labs =pop_labs,
-                   source_labs=source_labs,
+                   K_known = K_known,
                    control=list(maxiter = max_iter, trace = FALSE, square=FALSE, tol=1e-10));
     rev_q = matrix(res$par[(1:(nsamp*(K_pooled-1)))],nrow = nsamp, ncol = (K_pooled-1));
     q <- t(apply(rev_q, 1,function(x) transform(x)));
     # q = matrix(res$par[(1:(nsamp*K_pooled))],nrow = nsamp, ncol = K_pooled);
     temp <- res$par[-(1:(nsamp*(K_pooled-1)))];
-    f_pooled <- inv.logit(matrix(temp[0:(nSNPs*K_pooled)], nrow=nSNPs, ncol=K_pooled))
-    
-    out <- list("q"=q, "f_pooled"=f_pooled);
+    f_unknown <- inv.logit(matrix(temp[0:(nSNPs*K_unknown)], nrow=nSNPs, ncol=K_unknown))
+    beg = nSNPs*K_unknown + 1;
+    end = nSNPs*K_pooled;
+    if(beg >end)
+      f_known <- inv.logit(matrix(0, nrow=nSNPs, ncol=K_known));
+    if(end >beg)
+      f_known <- inv.logit(matrix(temp[beg:end], nrow=nSNPs, ncol=K_known));
+
+    out <- list("q"=q, "f_known"=f_known,"f_unknown"=f_unknown);
 
     return(out)
   }
@@ -57,8 +74,8 @@ ancient_structure <- function(geno_data, K_unknown, pop_labs, source_labs, max_i
   if(!use_squarem)
   {
     for(iter in 1:max_iter) {
-      out = update_squarem(param_vec_in, geno_data, pop_labs, source_labs, K_unknown);
-      loglik <- loglik_squarem(param_vec_in, geno_data, pop_labs, source_labs, K_unknown);
+      out = update_squarem(param_vec_in, geno_data, nsamp, K_unknown, K_known, nSNPs);
+      loglik <- loglik_squarem(param_vec_in, geno_data, nsamp, K_unknown, K_known, nSNPs);
       cat('Neg Loglikelihood at iteration',iter,':',loglik,'\n');
       param_vec_in <- out;
       }
@@ -66,8 +83,16 @@ ancient_structure <- function(geno_data, K_unknown, pop_labs, source_labs, max_i
       rev_q = matrix(param_vec_in[(1:(nsamp*(K_pooled-1)))],nrow = nsamp, ncol = (K_pooled-1));
       q <- t(apply(rev_q, 1,function(x) transform(x)));
       temp <- param_vec_in[-(1:(nsamp*(K_pooled-1)))];
-      f_pooled <- inv.logit(matrix(temp[0:(nSNPs*K_pooled)], nrow=nSNPs, ncol=K_pooled))
-      outlist <- list("q"=q, "f_pooled"=f_pooled);
+      f_unknown <- inv.logit(matrix(temp[0:(nSNPs*K_unknown)], nrow=nSNPs, ncol=K_unknown))
+      beg = nSNPs*K_unknown + 1;
+      end = nSNPs*K_pooled;
+      if(beg >end)
+        f_known <- inv.logit(matrix(0, nrow=nSNPs, ncol=K_known));
+      if(end >beg)
+        f_known <- inv.logit(matrix(temp[beg:end], nrow=nSNPs, ncol=K_known));
+
+      outlist <- list("q"=q, "f_known"=f_known,"f_unknown"=f_unknown);
+
       return(outlist)
   }
 

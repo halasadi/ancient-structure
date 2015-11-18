@@ -1,23 +1,3 @@
-###  Fixing cluster membership to 100 % for known source pops in omega
-
-fix_clus_mem <- function(omega, pop_labs, source_labs, eps=1e-04)
-{
-  # print("EVERYTHING OK 1")
-  omega1 <- omega;
-  row.names(omega) <- pop_labs;
-  k_unknown <- dim(omega)[2] - length(source_labs);
-  if(!is.null(source_labs)){
-    for (i in 1:length(source_labs)){
-      e_i = rep(0, dim(omega)[2]);
-      e_i[i+k_unknown] = 1-eps;
-      e_i[-(i+k_unknown)] = rep(eps/(length(e_i)-1), (length(e_i)-1));
-      inds = which(row.names(omega) == source_labs[i]);
-      omega[inds,] <- do.call("rbind",replicate(length(inds), e_i, simplify=FALSE))
-    }
-  }
-  #print("EVERYTHING OK 2")
-  return(omega)
-}
 
 ###  Transformation and Reverse transform functions
 
@@ -42,11 +22,8 @@ transform <- function(y)
 
 # @param_vec_in : a vector of size nsamp*n_clus+n_clus_known*n_genes+n_clus_unknown*ngenes: rev_trans(q), logit(f_known), logit(f_unknown) vectorized
 
-loglik_squarem <- function(param_vec_in, geno_data, pop_labs, source_labs, K_unknown)
+loglik_squarem <- function(param_vec_in, geno_data, nsamp, K_unknown, K_known, nSNPs)
 {
-  nsamp <- dim(geno_data)[1];
-  nSNPs <- dim(geno_data)[2];
-  K_known <- length(source_labs);
   K_pooled <- K_known + K_unknown;
   
   # rev_q_in is nsamp*(K_pooled-1) matrix, each row is a reverse transform on q (topic prop matrix)
@@ -63,9 +40,18 @@ loglik_squarem <- function(param_vec_in, geno_data, pop_labs, source_labs, K_unk
   # extracting the unknown allele frequencies data from the param_vec_in object
   
   temp <- param_vec_in[-(1:(nsamp*(K_pooled-1)))];
-  f_pooled_in <- inv.logit(matrix(temp[0:(nSNPs*K_pooled)], nrow=nSNPs, ncol=K_pooled))
+  f_unknown_in <- inv.logit(matrix(temp[0:(nSNPs*K_unknown)], nrow=nSNPs, ncol=K_unknown))
+  
+  
+  # extracting the known allele frequencies data from the param_vec_in object
+  
+  beg = nSNPs*K_unknown + 1;
+  end = nSNPs*K_pooled;
+  f_known_in <- inv.logit(matrix(temp[beg:end], nrow=nSNPs, ncol=K_known));
   
   # pooling the unknown and known allele frequencies
+  
+  f_pooled_in <- cbind(f_unknown_in, f_known_in);
   
   # loglikelihood computation
   prod <- q_in %*% t(f_pooled_in);
@@ -83,11 +69,9 @@ library(SQUAREM)
 
 
 
-update_squarem <- function(param_vec_in, geno_data, pop_labs, source_labs, K_unknown)
+update_squarem <- function(param_vec_in, geno_data, nsamp, K_unknown, K_known, nSNPs)
 {
-  nsamp <- dim(geno_data)[1];
-  nSNPs <- dim(geno_data)[2];
-  K_known <- length(source_labs);
+  
   K_pooled <- K_known +K_unknown;
   
   # rev_q_in is nsamp*(K_pooled-1) matrix, each row is a reverse transform on q (topic prop matrix)
@@ -102,12 +86,18 @@ update_squarem <- function(param_vec_in, geno_data, pop_labs, source_labs, K_unk
   # extracting the unknown allele frequencies data from the param_vec_in object and inv transforming it
   
   temp <- param_vec_in[-(1:(nsamp*(K_pooled-1)))];
-  f_pooled_in <- inv.logit(matrix(temp[0:(nSNPs*K_pooled)], nrow=nSNPs, ncol=K_pooled))
+  f_unknown_in <- inv.logit(matrix(temp[0:(nSNPs*K_unknown)], nrow=nSNPs, ncol=K_unknown));
+  
+  # extracting the known allele frequencies data from the param_vec_in object and inv transforming it
+  
+  beg = nSNPs*K_unknown + 1;
+  end = nSNPs*K_pooled;
+  f_known_in <- inv.logit(matrix(temp[beg:end], nrow=nSNPs, ncol=K_known));
   
   # using the EM update scheme- the main function 
-  out <- update_EM(q_in, f_pooled_in, pop_labs, source_labs, geno_data);
+  out <- update_EM(q_in, f_unknown_in,f_known_in,geno_data);
   rev_q_out <- as.matrix(t(apply(out$q, 1, function(x) reverse_transform(x))));
-  param_vec_out <- c(as.vector(rev_q_out),as.vector(logit(out$f_pooled)));
+  param_vec_out <- c(as.vector(rev_q_out),as.vector(logit(out$f_unknown)),as.vector(logit(out$f_known)));
   return(param_vec_out)
 }
 
@@ -123,7 +113,7 @@ getNCols <- function(M){
   }
 }
 
-update_EM <- function(q_in, f_pooled_in, pop_labs, source_labs, geno_data)
+update_EM <- function(q_in, f_unknown_in, f_known_in, geno_data)
   # q_in: topic proportions (n x k)
   # f_unknown: allele frequences of the unknown ancestral populations (nSNPs x k_unknown)
   # f_knowm: allele frequencies of the known ancestral populations (nSNPs x k_known)
@@ -131,9 +121,14 @@ update_EM <- function(q_in, f_pooled_in, pop_labs, source_labs, geno_data)
   # if k_unknown =0, use the input for f_unknown to be matrix(nrow=nSNPs,ncol=0)
   
 {
+  f_pooled_in <- cbind(f_unknown_in, f_known_in);
   nSNPs = dim(f_pooled_in)[1]
   nsamp = dim(q_in)[1]
   K_pooled = getNCols(f_pooled_in)
+  
+  K_known <- getNCols(f_known_in);
+  K_unknown <- getNCols(f_unknown_in);
+
 
   ###   Deriving a using for loop without vectorization and paralleization (commented)
   #  a_ser <- array(0, c(nsamp, nSNPs, K_pooled));
@@ -187,22 +182,25 @@ update_EM <- function(q_in, f_pooled_in, pop_labs, source_labs, geno_data)
     b[n,,] <- b_outer[[n]];
   }
   
-  f_pooled_out <- matrix(nrow=nSNPs,ncol=0)
+  f_unknown_out <- matrix(nrow=nSNPs,ncol=0)
+  f_known_out <- f_known_in;
   
-  if (K_pooled != 0){
-    f_pooled_out <- sapply(1:K_pooled, function(k) colSums(a[,,k])/(colSums(a[,,k])+colSums(b[,,k])))
-  }
-    #    f_pooled_out <- array(0, c(nSNPs,K_pooled));
+  if (K_unknown != 0){
+    f_unknown_out <- sapply(1:K_unknown, function(k) colSums(a[,,k])/(colSums(a[,,k])+colSums(b[,,k])))
+    #    f_unknown_out <- array(0, c(nSNPs,K_unknown));
     #    for (j in 1:nSNPs)
     #    {
-    #      for(k in 1:K_pooled){
-    #        f_pooled_out[j,k] <- sum(a[,j,k])/(sum(a[,j,k])+sum(b[,j,k]));
+    #      for(k in 1:K_unknown){
+    #        f_unknown_out[j,k] <- sum(a[,j,k])/(sum(a[,j,k])+sum(b[,j,k]));
     #      }
     #    }
     
+  }
+  
+  
+  
   q_out <- t(sapply(1:nsamp, function(i) 0.5 * colMeans(a[i,,]) + 0.5* colMeans(b[i,,])));
- # q_out <- fix_clus_mem(q_out, pop_labs, source_labs);
-  out <- list("f_pooled"=f_pooled_out,"q"=q_out);
+  out <- list("f_unknown"=f_unknown_out,"f_known"=f_known_out,"q"=q_out);
   return(out)
   
 }
